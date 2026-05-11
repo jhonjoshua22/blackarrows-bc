@@ -10,27 +10,38 @@ const Hero = () => {
   const [chatMessage, setChatMessage] = useState("Hello! I'm the Black Arrows AI. Ask me anything about the club!");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Function to talk to the AI (Free via Puter.js)
+  // Free AI Function via Hugging Face
   const handleChat = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
 
     setIsLoading(true);
     try {
-      // Puter.js allows free access to models like Claude or Gemini in the browser
-      // You would add <script src="https://js.puter.com/v2/"></script> to your index.html
-      // or use their npm package.
-      const response = await window.puter.ai.chat(
-        `You are an AI assistant for the Black Arrows Badminton Club. 
-         Keep answers short and energetic. User asks: ${input}`,
-        { model: 'claude-3-5-sonnet' } 
+      // We use a free open-source model (Mistral) which is great for AI chat
+      const response = await fetch(
+        "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
+        {
+          headers: {
+            Authorization: `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`,
+            "Content-Type": "application/json",
+          },
+          method: "POST",
+          body: JSON.stringify({
+            inputs: `[INST] You are the AI for Black Arrows Badminton Club. Be short and helpful. User asks: ${input} [/INST]`,
+          }),
+        }
       );
+
+      const result = await response.json();
       
-      setChatMessage(response.message.content[0].text);
+      // Extract the text and clean up the prompt tags
+      let aiText = result[0].generated_text.split("[/INST]").pop().trim();
+      
+      setChatMessage(aiText);
       setInput("");
     } catch (error) {
       console.error("AI Error:", error);
-      setChatMessage("Oops, my circuits are tangled. Try again!");
+      setChatMessage("I'm having trouble connecting to my brain. Try again in a second!");
     } finally {
       setIsLoading(false);
     }
@@ -87,7 +98,7 @@ const Hero = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask the bot..."
-                className="w-full bg-background/50 border border-primary/30 rounded-lg px-4 py-2 font-rajdhani focus:outline-none focus:border-primary neon-shadow-sm"
+                className="w-full bg-background/50 border border-primary/30 rounded-lg px-4 py-2 font-rajdhani focus:outline-none focus:border-primary neon-shadow-sm text-white"
               />
               <button 
                 type="submit" 
