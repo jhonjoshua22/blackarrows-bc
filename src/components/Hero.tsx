@@ -15,13 +15,14 @@ const Hero = () => {
 
     setIsLoading(true);
     
-    // Using your newly generated API Key
+    // Using your new API Key
     const API_KEY = "AIzaSyDPW16mNyD9fXmJqqntUo_WSEF_zY5nso0"; 
 
     try {
-      // FIX: Switching to the stable 'v1' endpoint and using 'gemini-1.5-flash-latest'
+      // FIX: Use v1beta and gemini-1.5-flash. 
+      // If this STILL 404s, change 'gemini-1.5-flash' to 'gemini-pro' below.
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
         {
           method: "POST",
           headers: {
@@ -51,7 +52,8 @@ const Hero = () => {
       setInput("");
     } catch (error) {
       console.error("Full Debug Error:", error);
-      setChatMessage("My circuits are a bit busy! Try again in a second.");
+      // Display the specific error message in the chat bubble so you can see it without opening console
+      setChatMessage(`Error: ${error.message.split(' ').slice(0, 5).join(' ')}...`);
     } finally {
       setIsLoading(false);
     }
@@ -62,18 +64,22 @@ const Hero = () => {
       id="home"
       className="relative min-h-screen flex items-center justify-center overflow-hidden cyber-grid mt-[10vh]"
     >
+      {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-background" />
       <div className="absolute inset-0 bg-gradient-to-r from-background via-transparent to-background" />
       
+      {/* Animated Background Elements */}
       <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-[100px] animate-glow-pulse" />
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/10 rounded-full blur-[120px] animate-glow-pulse" style={{ animationDelay: "1s" }} />
       
+      {/* Scan Line Effect */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.02]">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary to-transparent h-[200%] animate-scan" />
       </div>
 
       <div className="container mx-auto px-4 relative z-10 mt-[20vh]">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-4">
+          {/* Left Logo */}
           <div className="hidden lg:flex flex-col items-center gap-4 animate-slide-in-left">
             <div className="w-32 h-32 glass-card p-2 neon-border-red hover:scale-110 transition-transform duration-500 overflow-hidden rounded-xl">
               <a href="https://www.themagicworlds.com/" target="_blank">
@@ -83,8 +89,11 @@ const Hero = () => {
             <span className="font-orbitron text-sm text-muted-foreground tracking-widest">Magic Worlds</span>
           </div>
 
+          {/* Center Content */}
           <div className="flex flex-col items-center text-center max-w-3xl">
+            {/* Avatar & Chat Bubble */}
             <div className="relative mb-8 animate-float">
+              {/* Chat Bubble Popup */}
               <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-64 glass-card p-3 rounded-xl border-primary/50 text-xs font-rajdhani animate-fade-in shadow-2xl">
                 <p className="text-foreground">{chatMessage}</p>
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-card border-r border-b border-primary/50 rotate-45"></div>
@@ -95,10 +104,12 @@ const Hero = () => {
                   <img src={mwbot} alt="Cyber Badminton Player" className="w-full h-full object-cover scale-110" />
                 </div>
               </div>
+              {/* Glow Ring */}
               <div className="absolute inset-0 border-2 border-primary/30 animate-spin-slow" />
               <div className="absolute -inset-2 border border-secondary/20 animate-spin-slow" style={{ animationDirection: "reverse" }} />
             </div>
 
+            {/* AI Input Field */}
             <form onSubmit={handleChat} className="relative w-full max-w-md mb-8 flex gap-2">
               <input 
                 type="text" 
@@ -116,6 +127,7 @@ const Hero = () => {
               </button>
             </form>
 
+            {/* Headline */}
             <h1 className="font-orbitron text-4xl md:text-6xl lg:text-7xl font-black mb-4 animate-fade-in-up">
               <span className="text-foreground">BLACK </span>
               <span className="text-primary neon-red">ARROWS</span>
@@ -129,6 +141,7 @@ const Hero = () => {
               Black Arrows Badminton Club provides group and individual coaching for juniors and adults across London. 
             </p>
 
+            {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: "0.6s" }}>
               <button className="btn-neon-red">
                 <span className="relative z-10">JOIN THE CLUB</span>
@@ -139,6 +152,7 @@ const Hero = () => {
             </div>
           </div>
 
+          {/* Right Logo */}
           <div className="hidden lg:flex flex-col items-center gap-4 animate-slide-in-right">
             <div className="w-32 h-32 glass-card p-4 neon-border-green hover:scale-110 transition-transform duration-500 flex items-center justify-center">
               <img src={clubLogo} alt="Black Arrows Logo" className="w-full h-full object-contain" />
