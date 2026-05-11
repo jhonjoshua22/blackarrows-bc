@@ -51,7 +51,7 @@ const Hero = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary to-transparent h-[200%] animate-scan" />
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-4 relative z-10 mt-[20vh]">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-4">
           {/* Left Logo */}
           <div className="hidden lg:flex flex-col items-center gap-4 animate-slide-in-left">
