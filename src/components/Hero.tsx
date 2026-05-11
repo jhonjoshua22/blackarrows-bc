@@ -5,8 +5,7 @@ import clubLogo from "@/assets/v1logo.png";
 import mwLogo from "@/assets/mwlogo.jpg";
 import mwbot from "@/assets/mwbot.jpg";
 
-// Initialize the client
-// REPLACE 'hf_...' WITH YOUR ACTUAL HUGGING FACE TOKEN
+// Initialize the client - Ensure your token is pasted here correctly
 const hf = new HfInference("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");
 
 const Hero = () => {
@@ -20,14 +19,17 @@ const Hero = () => {
 
     setIsLoading(true);
     try {
-      // Switched to Mistral-Nemo - newer and often more available on the free tier
+      // Switched to Llama-3-8B-Instruct (Usually has better availability)
       const response = await hf.textGeneration({
-        model: "mistralai/Mistral-Nemo-Instruct-2407",
-        inputs: `[INST] You are the assistant for Black Arrows Badminton Club. Keep responses under 15 words. User: ${input} [/INST]`,
+        model: "meta-llama/Meta-Llama-3-8B-Instruct",
+        inputs: `<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+        You are the AI assistant for Black Arrows Badminton Club. Keep responses under 15 words.<|eot_id|>
+        <|start_header_id|>user<|end_header_id|>${input}<|eot_id|>
+        <|start_header_id|>assistant<|end_header_id|>`,
         parameters: {
-          max_new_tokens: 40,
+          max_new_tokens: 50,
           return_full_text: false,
-          temperature: 0.7,
+          stop: ["<|eot_id|>"]
         },
       });
 
@@ -37,7 +39,6 @@ const Hero = () => {
       setInput("");
     } catch (error) {
       console.error("AI Error:", error);
-      // This is the 503 "Loading" state
       setChatMessage("I'm powering up my shuttlecocks! Give me 10 seconds and try again.");
     } finally {
       setIsLoading(false);
