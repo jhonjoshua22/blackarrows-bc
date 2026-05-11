@@ -1,47 +1,44 @@
 import { useState } from "react";
 import { ChevronDown, Send, Loader2 } from "lucide-react";
-import heroAvatar from "@/assets/hero-avatar.png";
+import { HfInference } from "@huggingface/inference";
 import clubLogo from "@/assets/v1logo.png";
 import mwLogo from "@/assets/mwlogo.jpg";
 import mwbot from "@/assets/mwbot.jpg";
+
+// Initialize the client
+// REPLACE 'hf_...' WITH YOUR ACTUAL HUGGING FACE TOKEN
+const hf = new HfInference("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");
 
 const Hero = () => {
   const [input, setInput] = useState("");
   const [chatMessage, setChatMessage] = useState("Hello! I'm the Black Arrows AI. Ask me anything about the club!");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Free AI Function via Hugging Face
   const handleChat = async (e) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || isLoading) return;
 
     setIsLoading(true);
     try {
-      // We use a free open-source model (Mistral) which is great for AI chat
-      const response = await fetch(
-        "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
-        {
-          headers: {
-            Authorization: `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`,
-            "Content-Type": "application/json",
-          },
-          method: "POST",
-          body: JSON.stringify({
-            inputs: `[INST] You are the AI for Black Arrows Badminton Club. Be short and helpful. User asks: ${input} [/INST]`,
-          }),
-        }
-      );
+      // Switched to Mistral-Nemo - newer and often more available on the free tier
+      const response = await hf.textGeneration({
+        model: "mistralai/Mistral-Nemo-Instruct-2407",
+        inputs: `[INST] You are the assistant for Black Arrows Badminton Club. Keep responses under 15 words. User: ${input} [/INST]`,
+        parameters: {
+          max_new_tokens: 40,
+          return_full_text: false,
+          temperature: 0.7,
+        },
+      });
 
-      const result = await response.json();
-      
-      // Extract the text and clean up the prompt tags
-      let aiText = result[0].generated_text.split("[/INST]").pop().trim();
-      
-      setChatMessage(aiText);
+      if (response && response.generated_text) {
+        setChatMessage(response.generated_text.trim());
+      }
       setInput("");
     } catch (error) {
       console.error("AI Error:", error);
-      setChatMessage("I'm having trouble connecting to my brain. Try again in a second!");
+      // This is the 503 "Loading" state
+      setChatMessage("I'm powering up my shuttlecocks! Give me 10 seconds and try again.");
     } finally {
       setIsLoading(false);
     }
@@ -64,20 +61,19 @@ const Hero = () => {
 
       <div className="container mx-auto px-4 relative z-10 mt-[20vh]">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-4">
-          {/* Left Logo */}
           <div className="hidden lg:flex flex-col items-center gap-4 animate-slide-in-left">
             <div className="w-32 h-32 glass-card p-2 neon-border-red hover:scale-110 transition-transform duration-500 overflow-hidden rounded-xl">
-              <a href="https://www.themagicworlds.com/" target="_blank"><img src={mwLogo} alt="Black Arrows Logo" className="w-full h-full object-contain" /></a>
+              <a href="https://www.themagicworlds.com/" target="_blank">
+                <img src={mwLogo} alt="Black Arrows Logo" className="w-full h-full object-contain" />
+              </a>
             </div>
             <span className="font-orbitron text-sm text-muted-foreground tracking-widest">Magic Worlds</span>
           </div>
 
-          {/* Center Content */}
           <div className="flex flex-col items-center text-center max-w-3xl">
             {/* Avatar & Chat Bubble */}
             <div className="relative mb-8 animate-float">
-              {/* Chat Bubble Popup */}
-              <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-64 glass-card p-3 rounded-xl border-primary/50 text-xs font-rajdhani animate-fade-in">
+              <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-64 glass-card p-3 rounded-xl border-primary/50 text-xs font-rajdhani animate-fade-in shadow-2xl">
                 <p className="text-foreground">{chatMessage}</p>
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-card border-r border-b border-primary/50 rotate-45"></div>
               </div>
@@ -98,14 +94,14 @@ const Hero = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask the bot..."
-                className="w-full bg-background/50 border border-primary/30 rounded-lg px-4 py-2 font-rajdhani focus:outline-none focus:border-primary neon-shadow-sm text-white"
+                className="w-full bg-black/40 border border-primary/30 rounded-lg px-4 py-2 font-rajdhani focus:outline-none focus:border-primary neon-shadow-sm text-white"
               />
               <button 
                 type="submit" 
                 disabled={isLoading}
-                className="bg-primary p-2 rounded-lg hover:bg-primary/80 transition-colors"
+                className="bg-primary p-2 rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50"
               >
-                {isLoading ? <Loader2 className="animate-spin h-5 w-5" /> : <Send className="h-5 w-5" />}
+                {isLoading ? <Loader2 className="animate-spin h-5 w-5 text-black" /> : <Send className="h-5 w-5 text-black" />}
               </button>
             </form>
 
@@ -132,7 +128,6 @@ const Hero = () => {
             </div>
           </div>
 
-          {/* Right Logo */}
           <div className="hidden lg:flex flex-col items-center gap-4 animate-slide-in-right">
             <div className="w-32 h-32 glass-card p-4 neon-border-green hover:scale-110 transition-transform duration-500 flex items-center justify-center">
               <img src={clubLogo} alt="Black Arrows Logo" className="w-full h-full object-contain" />
