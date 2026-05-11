@@ -15,13 +15,13 @@ const Hero = () => {
 
     setIsLoading(true);
     
-    // Your API Key - If it still 404s, generate a fresh one at aistudio.google.com
+    // Using your newly generated API Key
     const API_KEY = "AIzaSyDPW16mNyD9fXmJqqntUo_WSEF_zY5nso0"; 
 
     try {
-      // Endpoint using v1beta and the most stable flash model ID
+      // FIX: Switching to the stable 'v1' endpoint and using 'gemini-1.5-flash-latest'
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
         {
           method: "POST",
           headers: {
@@ -29,7 +29,7 @@ const Hero = () => {
           },
           body: JSON.stringify({
             contents: [{
-              parts: [{ text: `You are the AI for Black Arrows Badminton Club. Keep responses under 15 words. User: ${input}` }]
+              parts: [{ text: `You are the AI assistant for Black Arrows Badminton Club. Keep responses very short (under 15 words). User asks: ${input}` }]
             }]
           })
         }
@@ -39,20 +39,19 @@ const Hero = () => {
 
       if (!response.ok) {
         console.error("Gemini Error Payload:", data);
-        throw new Error(data.error?.message || "Connection failed");
+        throw new Error(data.error?.message || "Connection issue");
       }
       
       if (data.candidates && data.candidates[0].content.parts[0].text) {
         setChatMessage(data.candidates[0].content.parts[0].text.trim());
       } else {
-        setChatMessage("I'm awake! Ask me about club times or coaching.");
+        setChatMessage("I'm not sure how to answer that. Try asking about our coaching!");
       }
       
       setInput("");
     } catch (error) {
       console.error("Full Debug Error:", error);
-      // This will show you exactly why it's failing in the chat bubble
-      setChatMessage(`Error: ${error.message.substring(0, 40)}`);
+      setChatMessage("My circuits are a bit busy! Try again in a second.");
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +76,7 @@ const Hero = () => {
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-4">
           <div className="hidden lg:flex flex-col items-center gap-4 animate-slide-in-left">
             <div className="w-32 h-32 glass-card p-2 neon-border-red hover:scale-110 transition-transform duration-500 overflow-hidden rounded-xl">
-              <a href="https://www.themagicworlds.com/" target="_blank" rel="noreferrer">
+              <a href="https://www.themagicworlds.com/" target="_blank">
                 <img src={mwLogo} alt="Black Arrows Logo" className="w-full h-full object-contain" />
               </a>
             </div>
