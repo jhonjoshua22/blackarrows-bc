@@ -1,25 +1,52 @@
-import { ChevronDown } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, Send, Loader2 } from "lucide-react";
 import heroAvatar from "@/assets/hero-avatar.png";
 import clubLogo from "@/assets/v1logo.png";
 import mwLogo from "@/assets/mwlogo.jpg";
 import mwbot from "@/assets/mwbot.jpg";
 
-
 const Hero = () => {
+  const [input, setInput] = useState("");
+  const [chatMessage, setChatMessage] = useState("Hello! I'm the Black Arrows AI. Ask me anything about the club!");
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Function to talk to the AI (Free via Puter.js)
+  const handleChat = async (e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    setIsLoading(true);
+    try {
+      // Puter.js allows free access to models like Claude or Gemini in the browser
+      // You would add <script src="https://js.puter.com/v2/"></script> to your index.html
+      // or use their npm package.
+      const response = await window.puter.ai.chat(
+        `You are an AI assistant for the Black Arrows Badminton Club. 
+         Keep answers short and energetic. User asks: ${input}`,
+        { model: 'claude-3-5-sonnet' } 
+      );
+      
+      setChatMessage(response.message.content[0].text);
+      setInput("");
+    } catch (error) {
+      console.error("AI Error:", error);
+      setChatMessage("Oops, my circuits are tangled. Try again!");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <section
       id="home"
       className="relative min-h-screen flex items-center justify-center overflow-hidden cyber-grid mt-[10vh]"
     >
-      {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-background" />
       <div className="absolute inset-0 bg-gradient-to-r from-background via-transparent to-background" />
       
-      {/* Animated Background Elements */}
       <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-[100px] animate-glow-pulse" />
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/10 rounded-full blur-[120px] animate-glow-pulse" style={{ animationDelay: "1s" }} />
       
-      {/* Scan Line Effect */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.02]">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary to-transparent h-[200%] animate-scan" />
       </div>
@@ -36,35 +63,54 @@ const Hero = () => {
 
           {/* Center Content */}
           <div className="flex flex-col items-center text-center max-w-3xl">
-            {/* Avatar */}
+            {/* Avatar & Chat Bubble */}
             <div className="relative mb-8 animate-float">
+              {/* Chat Bubble Popup */}
+              <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-64 glass-card p-3 rounded-xl border-primary/50 text-xs font-rajdhani animate-fade-in">
+                <p className="text-foreground">{chatMessage}</p>
+                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-card border-r border-b border-primary/50 rotate-45"></div>
+              </div>
+
               <div className="w-68 h-68 md:w-68 md:h-68 bg-gradient-to-br from-primary/30 to-secondary/20 p-1">
                 <div className="w-full h-full bg-card flex items-center justify-center overflow-hidden">
                   <img src={mwbot} alt="Cyber Badminton Player" className="w-full h-full object-cover scale-110" />
                 </div>
               </div>
-              {/* Glow Ring */}
               <div className="absolute inset-0 border-2 border-primary/30 animate-spin-slow" />
               <div className="absolute -inset-2 border border-secondary/20 animate-spin-slow" style={{ animationDirection: "reverse" }} />
             </div>
 
-            {/* Headline */}
+            {/* AI Input Field */}
+            <form onSubmit={handleChat} className="relative w-full max-w-md mb-8 flex gap-2">
+              <input 
+                type="text" 
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask the bot..."
+                className="w-full bg-background/50 border border-primary/30 rounded-lg px-4 py-2 font-rajdhani focus:outline-none focus:border-primary neon-shadow-sm"
+              />
+              <button 
+                type="submit" 
+                disabled={isLoading}
+                className="bg-primary p-2 rounded-lg hover:bg-primary/80 transition-colors"
+              >
+                {isLoading ? <Loader2 className="animate-spin h-5 w-5" /> : <Send className="h-5 w-5" />}
+              </button>
+            </form>
+
             <h1 className="font-orbitron text-4xl md:text-6xl lg:text-7xl font-black mb-4 animate-fade-in-up">
               <span className="text-foreground">BLACK </span>
               <span className="text-primary neon-red">ARROWS</span>
             </h1>
             
-            {/* Subtitle */}
             <p className="font-rajdhani text-xl md:text-2xl text-muted-foreground mb-2 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
               BADMINTON CLUB
             </p>
             
-            {/* Tagline */}
             <p className="font-rajdhani text-lg text-muted-foreground/80 max-w-xl mb-8 animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
               Black Arrows Badminton Club provides group and individual coaching for juniors and adults across London. 
             </p>
 
-            {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: "0.6s" }}>
               <button className="btn-neon-red">
                 <span className="relative z-10">JOIN THE CLUB</span>
@@ -84,9 +130,6 @@ const Hero = () => {
           </div>
         </div>
       </div>
-
-      {/* Scroll Indicator */}
-      
     </section>
   );
 };
