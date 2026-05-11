@@ -1,12 +1,8 @@
 import { useState } from "react";
 import { ChevronDown, Send, Loader2 } from "lucide-react";
-import { HfInference } from "@huggingface/inference";
 import clubLogo from "@/assets/v1logo.png";
 import mwLogo from "@/assets/mwlogo.jpg";
 import mwbot from "@/assets/mwbot.jpg";
-
-// Initialize the client - Ensure your token is pasted here correctly
-const hf = new HfInference("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");
 
 const Hero = () => {
   const [input, setInput] = useState("");
@@ -18,28 +14,33 @@ const Hero = () => {
     if (!input.trim() || isLoading) return;
 
     setIsLoading(true);
-    try {
-      // Switched to Llama-3-8B-Instruct (Usually has better availability)
-      const response = await hf.textGeneration({
-        model: "meta-llama/Meta-Llama-3-8B-Instruct",
-        inputs: `<|begin_of_text|><|start_header_id|>system<|end_header_id|>
-        You are the AI assistant for Black Arrows Badminton Club. Keep responses under 15 words.<|eot_id|>
-        <|start_header_id|>user<|end_header_id|>${input}<|eot_id|>
-        <|start_header_id|>assistant<|end_header_id|>`,
-        parameters: {
-          max_new_tokens: 50,
-          return_full_text: false,
-          stop: ["<|eot_id|>"]
-        },
-      });
+    // REPLACE THIS WITH YOUR KEY FROM GOOGLE AI STUDIO
+    const API_KEY = "AIzaSyCAnU9qetouypVNQu5g8AvBSUwpNcWbRTI";
 
-      if (response && response.generated_text) {
-        setChatMessage(response.generated_text.trim());
-      }
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{ 
+                text: `You are the AI for Black Arrows Badminton Club. Keep responses under 15 words. User asks: ${input}` 
+              }]
+            }]
+          })
+        }
+      );
+
+      const data = await response.json();
+      const aiResponse = data.candidates[0].content.parts[0].text;
+      
+      setChatMessage(aiResponse.trim());
       setInput("");
     } catch (error) {
       console.error("AI Error:", error);
-      setChatMessage("I'm powering up my shuttlecocks! Give me 10 seconds and try again.");
+      setChatMessage("My connection dropped! Check your API key or try again.");
     } finally {
       setIsLoading(false);
     }
